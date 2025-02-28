@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanBib Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function toggleCheckboxes(source, type) {
+            checkboxes = document.getElementsByName(type + '_fields');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload a .bib file</h2>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <label for="bibfile">Choose .bib file:</label>
+            <input type="file" name="bibfile" id="bibfile" required>
+
+            <h3>Optional: Upload a .json settings file</h3>
+            <input type="file" name="jsonfile" id="jsonfile">
+
+            <h3>OR Select Fields to Keep</h3>
+
+            <!-- ARTICLE FIELDS -->
+            <fieldset>
+                <legend>Article Fields</legend>
+                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'article')"> Select All</label><br>
+                {% for field in ["author", "title", "journal", "year", "doi"] %}
+                    <label>
+                        <input type="checkbox" name="article_fields" value="{{ field }}"> {{ field.capitalize() }}
+                    </label><br>
+                {% endfor %}
+            </fieldset>
+
+            <!-- BOOK FIELDS -->
+            <fieldset>
+                <legend>Book Fields</legend>
+                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'book')"> Select All</label><br>
+                {% for field in ["author", "title", "publisher", "year", "isbn", "edition"] %}
+                    <label>
+                        <input type="checkbox" name="book_fields" value="{{ field }}"> {{ field.capitalize() }}
+                    </label><br>
+                {% endfor %}
+            </fieldset>
+
+            <!-- INBOOK FIELDS -->
+            <fieldset>
+                <legend>Inbook Fields</legend>
+                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'inbook')"> Select All</label><br>
+                {% for field in ["author", "title", "chapter", "pages", "publisher", "year"] %}
+                    <label>
+                        <input type="checkbox" name="inbook_fields" value="{{ field }}"> {{ field.capitalize() }}
+                    </label><br>
+                {% endfor %}
+            </fieldset>
+
+            <button type="submit">Upload & Process</button>
+        </form>
+    </div>
+</body>
+</html>
