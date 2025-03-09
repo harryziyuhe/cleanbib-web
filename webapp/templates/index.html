@@ -3,64 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CleanBib Web</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script>
-        function toggleCheckboxes(source, type) {
-            checkboxes = document.getElementsByName(type + '_fields');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = source.checked;
-            }
-        }
-    </script>
+    <title>CleanBib - BibLaTex Manager and Formatter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href = "{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Lora:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Upload a .bib file</h2>
-        <form action="/" method="post" enctype="multipart/form-data">
-            <label for="bibfile">Choose .bib file:</label>
-            <input type="file" name="bibfile" id="bibfile" required>
+    <div class="container text-center mt-5">
+        <h1 class="title">CleanBib - BibLaTex Manager</h1>
+        <p class="subtitle">Easily format and manage your .bib files</p>
 
-            <h3>Optional: Upload a .json settings file</h3>
-            <input type="file" name="jsonfile" id="jsonfile">
+        <!-- Upload Section -->
+        <div id="upload-section" class="card-style">
+            <form id="upload-form" enctype="multipart/form-data">
+                <div id="drop-area">
+                    <p class="upload-text">Drag & Drop a .bib file here or <label for="file-input" class="upload-label">click to upload</label></p>
+                    <input type="file" id="file-input" name="bibfile" accept=".bib" hidden>
+                </div>
+            </form>
+            <div id="file-info" class="message hidden">
+                <p>Uploaded File: <span id="uploaded-file-name"></span></p>
+            </div>
+        </div>
 
-            <h3>OR Select Fields to Keep</h3>
+        <div id="process-section" class="card-style">
+            <form id="process-form" action="/process" method="post" enctype="multipart/form-data">
+                <h3>Field Selection</h3>
+                <div class="option-container">
+                    <button id="basic-btn" class="toggle-btn" type="button" onclick="toggleBasic()">Basic Options</button>
+                    <button id="advanced-btn" class="toggle-btn" type="button" onclick="toggleAdvanced()">Advanced Options</button>
+                </div>
 
-            <!-- ARTICLE FIELDS -->
-            <fieldset>
-                <legend>Article Fields</legend>
-                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'article')"> Select All</label><br>
-                {% for field in ["author", "title", "journal", "year", "doi"] %}
-                    <label>
-                        <input type="checkbox" name="article_fields" value="{{ field }}"> {{ field.capitalize() }}
-                    </label><br>
-                {% endfor %}
-            </fieldset>
+                <div id="basic-fields" class="basiccard hidden">
+                    <h4>Basic Field Selection</h4>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="fields" value="author" checked> Author</label>
+                        <label><input type="checkbox" name="fields" value="title" checked> Title</label>
+                        <label><input type="checkbox" name="fields" value="year" checked> Year</label>
+                        <label><input type="checkbox" name="fields" value="pages" checked> Pages</label>
+                        <label><input type="checkbox" name="fields" value="location" indeterminate> Location</label>
+                        <label><input type="checkbox" name="fields" value="doi"> DOI</label>
+                    </div>
+                </div>
 
-            <!-- BOOK FIELDS -->
-            <fieldset>
-                <legend>Book Fields</legend>
-                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'book')"> Select All</label><br>
-                {% for field in ["author", "title", "publisher", "year", "isbn", "edition"] %}
-                    <label>
-                        <input type="checkbox" name="book_fields" value="{{ field }}"> {{ field.capitalize() }}
-                    </label><br>
-                {% endfor %}
-            </fieldset>
+                <div id="advanced-fields" class="advancedcard hidden">
+                    <h4>Advanced Field Selection</h4>
+                    <div class="advanced-container">
+                        <div class="card">
+                            <h5>Article</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="article-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="article-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="article-fields" value="journal" checked> Journal</label>
+                                <label><input type="checkbox" name="article-fields" value="year" checked> Year</label>
+                                <label><input type="checkbox" name="article-fields" value="month"> Month</label>
+                                <label><input type="checkbox" name="article-fields" value="day"> Day</label>
+                                <label><input type="checkbox" name="article-fields" value="volume" checked> Volume</label>
+                                <label><input type="checkbox" name="article-fields" value="number" checked> Issue</label>
+                                <label><input type="checkbox" name="article-fields" value="pages" checked> Pages</label>
+                                <label><input type="checkbox" name="article-fields" value="issn"> ISSN</label>
+                                <label><input type="checkbox" name="article-fields" value="url"> URL</label>
+                                <label><input type="checkbox" name="article-fields" value="doi"> DOI</label>
+                            </div>
+                        </div>
 
-            <!-- INBOOK FIELDS -->
-            <fieldset>
-                <legend>Inbook Fields</legend>
-                <label><input type="checkbox" onclick="toggleCheckboxes(this, 'inbook')"> Select All</label><br>
-                {% for field in ["author", "title", "chapter", "pages", "publisher", "year"] %}
-                    <label>
-                        <input type="checkbox" name="inbook_fields" value="{{ field }}"> {{ field.capitalize() }}
-                    </label><br>
-                {% endfor %}
-            </fieldset>
+                        <div class="card">
+                            <h5>Book</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="book-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="book-fields" value="editor"> Editor</label>
+                                <label><input type="checkbox" name="book-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="book-fields" value="location" checked> Location</label>
+                                <label><input type="checkbox" name="book-fields" value="publisher" checked> Publisher</label>
+                                <label><input type="checkbox" name="book-fields" value="volume"> Volume</label>
+                                <label><input type="checkbox" name="book-fields" value="edition"> Edition</label>
+                                <label><input type="checkbox" name="book-fields" value="isbn"> ISBN</label>
+                            </div>
+                        </div>
 
-            <button type="submit">Upload & Process</button>
-        </form>
-    </div>
+                        <div class="card">
+                            <h5>Chapter</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="inbook-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="inbook-fields" value="editor" checked> Editor</label>
+                                <label><input type="checkbox" name="inbook-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="inbook-fields" value="booktitle" checked> Book Title</label>
+                                <label><input type="checkbox" name="inbook-fields" value="chapter"> Chapter</label>
+                                <label><input type="checkbox" name="inbook-fields" value="pages" checked> Pages</label>
+                                <label><input type="checkbox" name="inbook-fields" value="location" checked> Location</label>
+                                <label><input type="checkbox" name="inbook-fields" value="publisher" checked> Publisher</label>
+                                <label><input type="checkbox" name="inbook-fields" value="volume"> Volume</label>
+                                <label><input type="checkbox" name="inbook-fields" value="edition"> Edition</label>
+                                <label><input type="checkbox" name="inbook-fields" value="isbn"> ISBN</label>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h5>Conference Paper</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="inproceedings-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="booktitle"> Proceedings Title</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="location" checked> Location</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="eventtitle" checked> Conference Name</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="year" checked> Year</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="month"> Month</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="day"> Day</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="volume"> Volume</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="pages" checked> Pages</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="series"> Series</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="doi"> DOI</label>
+                                <label><input type="checkbox" name="inproceedings-fields" value="isbn"> ISBN</label>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h5>Preprint</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="misc-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="misc-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="misc-fields" value="location"> Location</label>
+                                <label><input type="checkbox" name="misc-fields" value="publisher"> Publisher</label>
+                                <label><input type="checkbox" name="misc-fields" value="year" checked> Year</label>
+                                <label><input type="checkbox" name="misc-fields" value="month"> Month</label>
+                                <label><input type="checkbox" name="misc-fields" value="day"> Day</label>
+                                <label><input type="checkbox" name="misc-fields" value="series"> Series</label>
+                                <label><input type="checkbox" name="misc-fields" value="url"> URL</label>
+                                <label><input type="checkbox" name="misc-fields" value="doi"> DOI</label>
+                                <label><input type="checkbox" name="misc-fields" value="isbn"> ISBN</label>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h5>Manuscript</h5>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="unpublished-fields" value="author" checked> Author</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="title" checked> Title</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="location"> Location</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="type"> Type</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="year" checked> Year</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="month"> Month</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="day"> Day</label>
+                                <label><input type="checkbox" name="unpublished-fields" value="pagetotal"> Total Pages</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="process-btn" type="submit" class="btn-style hidden">Process</button>
+            </form>
+        </div>
+
+        <div id="download-section" style="display: none;">
+            <a id="download-link" href="#" download>
+                <button class="btn-style download-btn">Download Processed File</button>
+            </a>
+        </div>
+    </div> 
 </body>
 </html>
