@@ -1,12 +1,11 @@
 import os
-import sys
 from cleanbib import BibCleaner
 from flask import Flask, render_template, request, send_file, jsonify, session
 from werkzeug.utils import secure_filename
 
 
-UPLOAD_FOLDER = "webapp/uploads"
-PROCESSED_FOLDER = "webapp/processed"
+UPLOAD_FOLDER = "uploads"
+PROCESSED_FOLDER = "processed"
 ALLOWED_EXTENSIONS = {"bib"}
 
 app = Flask(__name__)
@@ -81,4 +80,5 @@ def download(filename):
     return "File not found", 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    from waitress import serve  # Production-grade WSGI server
+    serve(app, host="0.0.0.0", port=8080)
